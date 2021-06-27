@@ -1,0 +1,15 @@
+name = "dir_to_graphviz"
+description = "Shiny new project"
+version = "0.0.0"
+
+authors = ["Paul Jarrett"]
+maintainers = ["Paul Jarrett <jarrett.paul.young@gmail.com>"]
+maintainers-logins = ["pyjarrett"]
+
+executables = ["dir_to_graphviz"]
+
+[[depends-on]]  # This line was added by `alr with`
+progress_indicators = "~0.0.1"  # This line was added by `alr with`
+
+[[depends-on]]  # This line was added by `alr with`
+dir_iterators = "~0.0.1"  # This line was added by `alr with`
