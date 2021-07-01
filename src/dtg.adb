@@ -1,5 +1,4 @@
 with Ada.Characters.Latin_1;
-with Ada.Text_IO;
 with Ada.Text_IO.Unbounded_IO;
 
 with Dir_Iterators.Recursive;
@@ -9,11 +8,21 @@ package body DTG is
     use Ada.Text_IO;
     use Ada.Text_IO.Unbounded_IO;
 
-    --  function Include_Everything (E : AD.Directory_Entry_Type) return Boolean is
-    --  begin
-    --      pragma Unreferenced (E);
-    --      return True;
-    --  end Include_Everythingde_Everything;
+    function Create(File_Name : String) return Report is
+    begin
+        return R : Report do
+            AIO.Open(R.Output_File, AIO.Out_File, File_Name);
+            AIO.Put_Line (R.Output_File, "digraph directories {");
+            AIO.Put_Line (R.Output_File, "rankdir=" & Quotation & "LR" & Quotation & ";");
+        end return;
+    end Create;
+
+    overriding
+    procedure Finalize(Self : in out Report) is
+    begin
+        AIO.Put_Line (Self.Output_File, "}");
+        Close(Self.Output_File);
+    end Finalize;
 
     function Skip_Dot_Files (E : AD.Directory_Entry_Type) return Boolean is
         Name : constant String := AD.Simple_Name (E);
@@ -46,7 +55,6 @@ package body DTG is
         Name        : constant ASU.Unbounded_String := Node_Name (AD.Full_Name (E));
         Parent_Name : constant ASU.Unbounded_String := Node_Name (Parent (AD.Full_Name (E)));
     begin
-        pragma Unreferenced (R);
         declare
             Source       : ASU.Unbounded_String;
             Destination  : ASU.Unbounded_String;
@@ -62,8 +70,8 @@ package body DTG is
                 Element_Name := ASU.To_Unbounded_String (AD.Simple_Name (E));
             end if;
 
-            Put_Line (Destination & "[shape=box label=" & Quotation & Element_Name & Quotation & "];");
-            Put_Line (Source & " -> " & Destination & ";");
+            Put_Line (R.Output_File, Destination & "[shape=box label=" & Quotation & Element_Name & Quotation & "];");
+            Put_Line (R.Output_File, Source & " -> " & Destination & ";");
         end;
     end Add;
 
@@ -72,7 +80,7 @@ package body DTG is
     begin
         for C of Full_Name loop
             case C is
-                when '/' | '\' | '.' | ':' | ' ' | '-' =>
+                when '/' | '\' | '.' | ':' | ' ' | '-' | '!' | '$' =>
                     ASU.Append (Safe_Name, '_');
                 when others =>
                     ASU.Append (Safe_Name, C);
@@ -103,17 +111,19 @@ package body DTG is
     procedure Evaluate (Result : in out Report; Dir_Root : String) is
         function Filter (E : AD.Directory_Entry_Type) return Boolean is
         begin
-            pragma Unreferenced (E);
             if Result.Include_Dot_Files then
-                return False;
-            else
                 return True;
+            else
+                declare
+                    Name : constant String := AD.Simple_Name(E);
+                begin
+                    return not (Name'Length > 1 and then Name(1) = '.');
+                end;
             end if;
         end Filter;
-        pragma Unreferenced(Filter);
 
         Walk : constant Dir_Iterators.Recursive.Recursive_Dir_Walk :=
-            Dir_Iterators.Recursive.Walk (Dir_Root, null);
+            Dir_Iterators.Recursive.Walk (Dir_Root, Filter'Access);
     begin
         for Dir_Entry of Walk loop
             if AD.Full_Name (Dir_Entry) /= AD.Full_Name (Dir_Root) and DTG.Should_Include (Result, Dir_Entry) then
