@@ -1,16 +1,15 @@
 name = "dir_to_graphviz"
-description = "Shiny new project"
-version = "0.0.0"
+description = "Print directories as a graphviz file."
+version = "0.1.0-dev"
 
 authors = ["Paul Jarrett"]
 maintainers = ["Paul Jarrett <jarrett.paul.young@gmail.com>"]
 maintainers-logins = ["pyjarrett"]
+licenses = "Apache-2.0"
+website = ""
+tags = ["dir", "graph"]
 
 executables = ["dir_to_graphviz"]
 
-[[depends-on]]  # This line was added by `alr with`
-progress_indicators = "~0.0.1"  # This line was added by `alr with`
-
-
-[[depends-on]]  # This line was added by `alr with`
-dir_iterators = "~0.0.1"  # This line was added by `alr with`
+[[depends-on]]
+dir_iterators = "~0.0.4"
