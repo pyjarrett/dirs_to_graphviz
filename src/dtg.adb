@@ -11,7 +11,7 @@ package body DTG is
     function Create(File_Name : String) return Report is
     begin
         return R : Report do
-            AIO.Open(R.Output_File, AIO.Out_File, File_Name);
+            AIO.Create(R.Output_File, AIO.Out_File, File_Name);
             AIO.Put_Line (R.Output_File, "digraph directories {");
             AIO.Put_Line (R.Output_File, "rankdir=" & Quotation & "LR" & Quotation & ";");
         end return;
