@@ -16,7 +16,7 @@ begin
     end if;
 
     declare
-        Result : DTG.Report := DTG.Create ("example.dot");
+        Result : DTG.Report := DTG.Create ("out.dot");
     begin
         Result.Include_Dot_Files := False;
         for Index in 1 .. ACL.Argument_Count loop
