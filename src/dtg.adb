@@ -80,7 +80,7 @@ package body DTG is
          Put_Line
            (R.Output_File,
             Destination
-            & "[shape=box label="
+            & " [shape=box label="
             & Quotation
             & Element_Name
             & Quotation
@@ -93,7 +93,7 @@ package body DTG is
       Safe_Name : ASU.Unbounded_String;
    begin
       ASU.Append (Safe_Name, """");
-      ASU.Append (Safe_Name, Full_Name);
+      ASU.Append (Safe_Name, Replace (Full_Name));
       ASU.Append (Safe_Name, """");
       return Safe_Name;
    end Node_Name;
@@ -118,26 +118,23 @@ package body DTG is
       return AD.Containing_Directory (Full_Name);
    end Parent;
 
-   procedure Evaluate (Result : in out Report; Dir_Root : String) is
-      function Filter (E : AD.Directory_Entry_Type) return Boolean is
+   function Filter (E : AD.Directory_Entry_Type) return Boolean is
+   begin
+      declare
+         Name : constant String := AD.Simple_Name (E);
       begin
-         if Result.Include_Dot_Files then
-            return True;
-         else
-            declare
-               Name : constant String := AD.Simple_Name (E);
-            begin
-               return not (Name'Length > 1 and then Name (1) = '.');
-            end;
-         end if;
-      end Filter;
+         return not (Name'Length > 1 and then Name (1) = '.');
+      end;
+   end Filter;
 
+   procedure Evaluate (Result : in out Report; Dir_Root : String) is
       Walk : constant Dir_Iterators.Recursive.Recursive_Dir_Walk :=
-        Dir_Iterators.Recursive.Walk (Dir_Root, Filter'Access);
+        Dir_Iterators.Recursive.Walk (Dir_Root,
+            (if Result.Include_Dot_Files then null else Filter'Access));
    begin
       for Dir_Entry of Walk loop
          if AD.Full_Name (Dir_Entry) /= AD.Full_Name (Dir_Root)
-           and DTG.Should_Include (Result, Dir_Entry)
+           and then DTG.Should_Include (Result, Dir_Entry)
          then
             DTG.Add (Result, Dir_Entry);
          end if;
